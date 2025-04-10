@@ -4,21 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Macau Bus Quick Check</title>
-    <!-- PWA meta tags -->
-    <meta name="theme-color" content="#2196F3">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Macau Bus">
-    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48cGF0aCBmaWxsPSIjMjE5NkYzIiBkPSJNMjI0IDMyYzEyMS4yIDAgMjIwIDk4LjggMjIwIDIyMHMtOTguOCAyMjAtMjIwIDIyMFM0IDM3My4yIDQgMjUyIDEwMi44IDMyIDIyNCAzMnpNMjI0IDQ4Yy0xMTIuNSAwLTIwNCA5MS41LTIwNCAyMDRzOTEuNSAyMDQgMjA0IDIwNCAyMDQtOTEuNSAyMDQtMjA0UzMzNi41IDQ4IDIyNCA0OHptMCAzMjBjLTY0LjEgMC0xMTYtNTEuOS0xMTYtMTE2czUxLjktMTE2IDExNi0xMTYgMTE2IDUxLjkgMTE2IDExNi01MS45IDExNi0xMTYgMTE2em0wLTE5MmMtNDIuMSAwLTc2IDMzLjktNzYgNzZzMzMuOSA3NiA3NiA3NiA3Ni0zMy45IDc2LTc2LTMzLjktNzYtNzYtNzZ6Ii8+PC9zdmc+">
-    <link rel="manifest" href="manifest.json">
-    <!-- Google Analytics 4 -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M0YY6MV7TN"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-M0YY6MV7TN');
-    </script>
+     <!-- Google Analytics 4 -->
+     <script async src="https://www.googletagmanager.com/gtag/js?id=G-M0YY6MV7TN"></script>
+     <script>
+         window.dataLayer = window.dataLayer || [];
+         function gtag(){dataLayer.push(arguments);}
+         gtag('js', new Date());
+         gtag('config', 'G-M0YY6MV7TN');
+     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -349,45 +342,6 @@
             color: var(--text-color);
             cursor: pointer;
         }
-
-        .add-to-home {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            cursor: pointer;
-            z-index: 100;
-            transition: all 0.3s ease;
-        }
-
-        .add-to-home:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        .add-to-home i {
-            font-size: 1.2rem;
-        }
-
-        .add-to-home.hidden {
-            display: none;
-        }
-
-        @media (max-width: 576px) {
-            .add-to-home {
-                bottom: 15px;
-                right: 15px;
-                padding: 8px 16px;
-            }
-        }
     </style>
 </head>
 <body>
@@ -454,11 +408,6 @@
             </div>
         </div>
     </div>
-
-    <button id="addToHomeBtn" class="add-to-home hidden">
-        <i class="fas fa-plus"></i>
-        <span>添加到主屏幕</span>
-    </button>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -707,45 +656,6 @@
                 helpModal.style.display = 'none';
             }
         }
-
-        // Add to Home Screen functionality
-        let deferredPrompt;
-        const addToHomeBtn = document.getElementById('addToHomeBtn');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // Prevent Chrome 67 and earlier from automatically showing the prompt
-            e.preventDefault();
-            // Stash the event so it can be triggered later
-            deferredPrompt = e;
-            // Show the button
-            addToHomeBtn.classList.remove('hidden');
-        });
-
-        addToHomeBtn.addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-            
-            // Show the install prompt
-            deferredPrompt.prompt();
-            
-            // Wait for the user to respond to the prompt
-            const { outcome } = await deferredPrompt.userChoice;
-            
-            if (outcome === 'accepted') {
-                console.log('User accepted the install prompt');
-            } else {
-                console.log('User dismissed the install prompt');
-            }
-            
-            // Clear the saved prompt since it can't be used again
-            deferredPrompt = null;
-            // Hide the button
-            addToHomeBtn.classList.add('hidden');
-        });
-
-        window.addEventListener('appinstalled', (evt) => {
-            console.log('App was installed');
-            addToHomeBtn.classList.add('hidden');
-        });
     </script>
 </body>
 </html> 
