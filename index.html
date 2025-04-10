@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Macau Bus Quick Check</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --secondary-color: #1976D2;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --text-color: #333333;
+            --error-color: #dc3545;
+            --empty-color: #6c757d;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .app-header h1 {
+            font-size: 1.5rem;
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .app-header h1 i {
+            margin-right: 10px;
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .input-group-text {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .form-control {
+            border-left: none;
+        }
+
+        .form-control:focus {
+            box-shadow: none;
+            border-color: #ced4da;
+        }
+
+        .bus-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .bus-item {
+            background-color: var(--card-background);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .bus-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .bus-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bus-number {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .favorite-btn {
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+            padding: 5px;
+            border-radius: 50%;
+        }
+
+        .favorite-btn:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+
+        .favorite-btn.active {
+            color: #ffd700;
+            animation: favoritePulse 0.3s ease;
+        }
+
+        @keyframes favoritePulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .modal-content {
+            border-radius: 15px;
+        }
+
+        .modal-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+        }
+
+        .btn-close {
+            color: white;
+        }
+
+        #favoritesBtn {
+            border-radius: 20px;
+            padding: 8px 15px;
+        }
+
+        #favoritesBtn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        #favoritesBtn i {
+            margin-right: 5px;
+        }
+
+        .error-message, .empty-message {
+            text-align: center;
+            padding: 20px;
+            color: var(--empty-color);
+            font-size: 1.1rem;
+        }
+
+        .error-message {
+            color: var(--error-color);
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding: 0 10px;
+            }
+            
+            .app-header h1 {
+                font-size: 1.2rem;
+            }
+            
+            .bus-item {
+                padding: 12px;
+            }
+        }
+
+        .main-content {
+            transition: transform 0.3s ease;
+        }
+
+        .main-content.slide-left {
+            transform: translateX(-100%);
+        }
+
+        .bus-detail-view {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            height: 100%;
+            background-color: var(--card-background);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .bus-detail-view.active {
+            right: 0;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .bus-detail-content {
+            margin-top: 60px;
+        }
+
+        .bus-route-frame {
+            width: 100%;
+            height: calc(100vh - 100px);
+            border: none;
+            margin-top: 20px;
+        }
+
+        .bus-item {
+            cursor: pointer;
+        }
+
+        .footer {
+            margin-top: auto; /* Push footer to the bottom */
+            text-align: center; /* Center the text */
+            padding: 30px 0; /* Add some padding */
+            background: #f5f5f5; /* Match background color */
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="container">
+            <header class="app-header">
+                <h1><i class="fas fa-bus"></i> Macau Bus Quick Check</h1>
+                <button id="favoritesBtn" class="btn btn-outline-primary">
+                    <i class="fas fa-star"></i> 我的最愛
+                </button>
+            </header>
+
+            <div class="search-container">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" id="searchInput" class="form-control" placeholder="輸入巴士路線號碼...">
+                </div>
+            </div>
+
+            <div class="bus-list" id="busList">
+                <!-- Bus items will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <div class="bus-detail-view" id="busDetailView">
+        <button class="back-button" id="backButton">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <div class="bus-detail-content">
+            <h2 id="detailTitle"></h2>
+            <iframe id="busRouteFrame" class="bus-route-frame" frameborder="0"></iframe>
+        </div>
+    </div>
+
+    <div class="footer">
+        <span>數據來源: DSAT - 澳門特別行政區交通事務局</span>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Bus data
+        const busData = [
+            { id: "1", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=1&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "1A", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=1A&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "2", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=2&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "2A", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=2A&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "2AS", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=2AS&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "3", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=3&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "3A", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=3A&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "3AX", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=3AX&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "3X", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=3X&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "4", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=4&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "5", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=5&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "5X", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=5X&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "6A", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=6A&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "6B", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=6B&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "7", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=7&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "8", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=8&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "8A", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=8A&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "9", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=9&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "9A", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=9A&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "10", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=10&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "10B", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=10B&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "11", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=11&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "12", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=12&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "15", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=15&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "15S", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=15S&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "15S1", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=15S1&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "15T", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=15T&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "16", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=16&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "16S", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=16S&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "17", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=17&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "17S", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=17S&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "18", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=18&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "18A", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=18A&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "18B", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=18B&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "19", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=19&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "21A", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=21A&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "22", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=22&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "23", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=23&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "25", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=25&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "25AX", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=25AX&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "25B", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=25B&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "25BS", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=25BS&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "26", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=26&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "26A", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=26A&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "27", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=27&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "28A", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=28A&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "28B", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=28B&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "28C", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=28C&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "29", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=29&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "30", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=30&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "30X", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=30X&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "32", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=32&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "33", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=33&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "34", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=34&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "35", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=35&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "36", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=36&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "37", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=37&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "39", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=39&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "50", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=50&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "50B", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=50B&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "51", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=51&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "51A", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=51A&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "51X", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=51X&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "52", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=52&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "55", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=55&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "56", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=56&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "59", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=59&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "60", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=60&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "61", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=61&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "65", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=65&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "71", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=71&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "71S", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=71S&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "72", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=72&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "73", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=73&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "101X", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=101X&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "102X", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=102X&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "103X", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=103X&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "701x", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=701x&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "AP1", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=AP1&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "AP1X", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=AP1X&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "H1", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=H1&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "H2", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=H2&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "H3", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=H3&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "MT1", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=MT1&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "MT2", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=MT2&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "MT3", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=MT3&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "MT4", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=MT4&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "MT5", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=MT5&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "N1A", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=N1A&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "N1B", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=N1B&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "N2", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=N2&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "N3", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=N3&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "N5", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=N5&direction=0&language=zh-tw&ver=3.6.8&routeType=0" },
+            { id: "N6", path: "https://bis.dsat.gov.mo:37812/macauweb/routeLine.html?routeName=N6&direction=0&language=zh-tw&ver=3.6.8&routeType=0" }
+        ];
+
+        // Favorites management
+        let favorites = JSON.parse(localStorage.getItem('busFavorites')) || [];
+
+        // DOM Elements
+        const searchInput = document.getElementById('searchInput');
+        const busList = document.getElementById('busList');
+        const favoritesBtn = document.getElementById('favoritesBtn');
+        const mainContent = document.querySelector('.main-content');
+        const busDetailView = document.getElementById('busDetailView');
+        const backButton = document.getElementById('backButton');
+        const detailTitle = document.getElementById('detailTitle');
+        const busRouteFrame = document.getElementById('busRouteFrame');
+
+        let currentBus = null;
+        let isShowingFavorites = false;
+
+        // Sort bus data by ID and favorites
+        function sortBuses(buses) {
+            return buses.sort((a, b) => {
+                const aIsFavorite = favorites.includes(a.id);
+                const bIsFavorite = favorites.includes(b.id);
+                
+                // First sort by favorite status
+                if (aIsFavorite && !bIsFavorite) return -1;
+                if (!aIsFavorite && bIsFavorite) return 1;
+                
+                // Then sort by route number
+                const aNum = parseInt(a.id);
+                const bNum = parseInt(b.id);
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return aNum - bNum;
+                }
+                return a.id.localeCompare(b.id);
+            });
+        }
+
+        // Render bus list
+        function renderBusList(buses) {
+            busList.innerHTML = '';
+            
+            if (buses.length === 0) {
+                busList.innerHTML = '<div class="empty-message">沒有找到巴士路線</div>';
+                return;
+            }
+            
+            // Sort buses with favorites first
+            const sortedBuses = sortBuses([...buses]);
+            
+            sortedBuses.forEach(bus => {
+                const isFavorite = favorites.includes(bus.id);
+                const busItem = document.createElement('div');
+                busItem.className = 'bus-item';
+                busItem.innerHTML = `
+                    <div class="bus-info">
+                        <i class="fas fa-bus-alt"></i>
+                        <span class="bus-number">${bus.id}</span>
+                    </div>
+                    <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-bus-id="${bus.id}">
+                        <i class="fas fa-star"></i>
+                    </button>
+                `;
+                
+                // Add click event for the entire bus item
+                busItem.addEventListener('click', (e) => {
+                    if (!e.target.closest('.favorite-btn')) {
+                        window.open(bus.path, '_blank');
+                    }
+                });
+                
+                // Add click event for favorite button
+                busItem.querySelector('.favorite-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleFavorite(bus.id);
+                });
+                
+                busList.appendChild(busItem);
+            });
+        }
+
+        // Show bus details
+        function showBusDetails(bus) {
+            currentBus = bus;
+            detailTitle.textContent = `巴士路線 ${bus.id}`;
+            busRouteFrame.src = bus.path;
+            
+            // Show detail view and slide main content
+            busDetailView.classList.add('active');
+            mainContent.classList.add('slide-left');
+        }
+
+        // Hide bus details
+        function hideBusDetails() {
+            busDetailView.classList.remove('active');
+            mainContent.classList.remove('slide-left');
+            busRouteFrame.src = '';
+        }
+
+        // Toggle favorite status
+        function toggleFavorite(busId) {
+            const index = favorites.indexOf(busId);
+            if (index === -1) {
+                favorites.push(busId);
+            } else {
+                favorites.splice(index, 1);
+            }
+            localStorage.setItem('busFavorites', JSON.stringify(favorites));
+            renderBusList(isShowingFavorites ? getFavoriteBuses() : busData);
+        }
+
+        // Get favorite buses
+        function getFavoriteBuses() {
+            return busData.filter(bus => favorites.includes(bus.id));
+        }
+
+        // Event Listeners
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filteredBuses = busData.filter(bus => 
+                bus.id.toLowerCase().includes(query)
+            );
+            renderBusList(filteredBuses);
+        });
+
+        favoritesBtn.addEventListener('click', () => {
+            isShowingFavorites = !isShowingFavorites;
+            favoritesBtn.classList.toggle('active');
+            renderBusList(isShowingFavorites ? getFavoriteBuses() : busData);
+        });
+
+        backButton.addEventListener('click', hideBusDetails);
+
+        // Initialize
+        renderBusList(busData);
+    </script>
+</body>
+</html> 
