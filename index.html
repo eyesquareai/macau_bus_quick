@@ -238,10 +238,101 @@
         }
 
         .footer {
-            margin-top: auto; /* Push footer to the bottom */
-            text-align: center; /* Center the text */
-            padding: 30px 0; /* Add some padding */
-            background: #f5f5f5; /* Match background color */
+            margin-top: auto;
+            text-align: center;
+            padding: 20px 0;
+            background: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .footer .data-source {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .footer .copyright {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer .social-links {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .help-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .help-modal-content {
+            background-color: var(--card-background);
+            margin: 50px auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 800px;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .help-modal-header {
+            margin-bottom: 20px;
+        }
+
+        .help-modal-title {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .help-modal-body {
+            line-height: 1.6;
+        }
+
+        .help-modal-body h3 {
+            color: var(--primary-color);
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .help-modal-body p {
+            margin-bottom: 15px;
+        }
+
+        .help-modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-color);
+            cursor: pointer;
         }
     </style>
 </head>
@@ -279,7 +370,35 @@
     </div>
 
     <div class="footer">
-        <span>數據來源: DSAT - 澳門特別行政區交通事務局</span>
+        <div class="data-source">
+            <span>數據來源: DSAT - 澳門特別行政區交通事務局</span>
+            <a onclick="toggleHelpModal()">使用條款</a>
+        </div>
+        <div class="copyright">
+            <span>© 2025 Eyesquare Ltd.</span>
+            <div class="social-links">
+                <a href="https://www.instagram.com/eyesquareai/" target="_blank">
+                    <i class="fab fa-instagram fa-lg"></i>
+                </a>
+                <a href="https://eyesquare.my.canva.site/home" target="_blank">Eyesquare</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="help-modal" id="helpModal">
+        <div class="help-modal-content">
+            <button class="help-modal-close" onclick="toggleHelpModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="help-modal-header">
+                <h2 class="help-modal-title">使用條款</h2>
+            </div>
+            <div class="help-modal-body">
+                <h3>免責聲明</h3>
+                <p>本網站已盡力確保內容準確，但並不對該等內容作出任何明示或隱含的保證及承諾，所有資料以「現狀」提供，不負任何責任。本網站也保留權利隨時刪除、暫時停載或編輯本網址上的各項資料而無須事先通知。本網站無論如何不對因為使用網站的資料而引致的任何損害或損失負任何責任或作任何賠償。</p>
+                <p>本網站有部份超連結連向其他服務機構網站。當用戶使用這些超連結連至其他網站時，即表示已離開本網站，並受到該等網站的使用條款等條文所規範，本網站並不對該等內容或使用該等網站而引致的任何損害或損失，負任何責任及作任何賠償。</p>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -515,6 +634,20 @@
 
         // Initialize
         renderBusList(busData);
+
+        // Help modal functionality
+        function toggleHelpModal() {
+            const helpModal = document.getElementById('helpModal');
+            helpModal.style.display = helpModal.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const helpModal = document.getElementById('helpModal');
+            if (event.target === helpModal) {
+                helpModal.style.display = 'none';
+            }
+        }
     </script>
 </body>
 </html> 
